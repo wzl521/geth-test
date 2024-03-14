@@ -1,0 +1,318 @@
+definitions:
+  models.Block:
+    properties:
+      hash:
+        type: string
+      headers:
+        items:
+          $ref: '#/definitions/models.Header'
+        type: array
+      number:
+        type: integer
+      propagators:
+        items:
+          $ref: '#/definitions/models.Propagator'
+        type: array
+    type: object
+  models.BlocksResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Block'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.CountryNode:
+    properties:
+      code:
+        type: string
+      name:
+        type: string
+      percentage:
+        type: string
+      stat:
+        $ref: '#/definitions/models.CountryNodeStat'
+      value:
+        type: integer
+    type: object
+  models.CountryNodeStat:
+    properties:
+      last7d:
+        type: string
+      last24h:
+        type: string
+    type: object
+  models.Header:
+    properties:
+      extraData:
+        items:
+          type: integer
+        type: array
+      gasLimit:
+        description: |-
+          Difficulty  *big.Int   `json:"difficulty" bson:"difficulty"`
+          Number      *big.Int   `json:"number" bson:"number"`
+        type: integer
+      gasUsed:
+        type: integer
+      logsBloom:
+        items:
+          type: integer
+        type: array
+      miner:
+        items:
+          type: integer
+        type: array
+      mixHash:
+        items:
+          type: integer
+        type: array
+      nonce:
+        items:
+          type: integer
+        type: array
+      parentHash:
+        items:
+          type: integer
+        type: array
+      receiptsRoot:
+        items:
+          type: integer
+        type: array
+      sha3Uncles:
+        items:
+          type: integer
+        type: array
+      stateRoot:
+        items:
+          type: integer
+        type: array
+      timestamp:
+        type: integer
+      transactionsRoot:
+        items:
+          type: integer
+        type: array
+    type: object
+  models.Node:
+    properties:
+      IP:
+        type: string
+      TCP:
+        type: integer
+      UDP:
+        type: integer
+      caps:
+        items:
+          type: string
+        type: array
+      country:
+        type: string
+      id:
+        description: Unique node identifier
+        type: string
+      inbound:
+        items:
+          additionalProperties:
+            type: boolean
+          type: object
+        type: array
+      name:
+        type: string
+      outbound:
+        items:
+          additionalProperties:
+            type: boolean
+          type: object
+        type: array
+      remoteAddress:
+        description: Remote endpoint of the TCP data connection
+        type: string
+    type: object
+  models.NodeStats:
+    properties:
+      last7d:
+        type: string
+      last24h:
+        type: string
+      lastWeek:
+        items:
+          type: integer
+        type: array
+      total:
+        type: integer
+    type: object
+  models.NodesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Node'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.Propagator:
+    properties:
+      fromPeerId:
+        type: string
+      isHead:
+        type: boolean
+      timestamp:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /block/{number}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: block number
+        in: path
+        name: blockNumber
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BlocksResponse'
+      summary: Get block by block number
+      tags:
+      - block
+  /block/all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page index, start from 1, default 1
+        in: path
+        name: page
+        required: true
+        type: integer
+      - description: page size, default 10
+        in: path
+        name: pagesize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BlocksResponse'
+      summary: Get all blocks by paging
+      tags:
+      - block
+  /node/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: node ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.NodesResponse'
+      summary: Get node
+      tags:
+      - node
+  /node/all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page index, start from 1, default 1
+        in: path
+        name: page
+        type: integer
+      - description: page size, default 10
+        in: path
+        name: pagesize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.NodesResponse'
+      summary: Get all nodes by paging
+      tags:
+      - node
+  /node/stats:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.NodeStats'
+      summary: Get node stats
+      tags:
+      - node
+  /node/top10:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CountryNode'
+            type: array
+      summary: Get top 10 nodes
+      tags:
+      - node
+  /transaction/{hash}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: transaction hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get transaction by hash
+      tags:
+      - transaction
+  /transaction/all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page index, start from 1, default 1
+        in: path
+        name: page
+        type: integer
+      - description: page size, default 10
+        in: path
+        name: pagesize
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all transactions by paging
+      tags:
+      - transaction
+swagger: "2.0"

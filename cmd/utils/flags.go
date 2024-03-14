@@ -75,7 +75,6 @@ import (
 	"github.com/ethereum/go-ethereum/triedb/pathdb"
 	pcsclite "github.com/gballet/go-libpcsclite"
 	gopsutil "github.com/shirou/gopsutil/mem"
-	"github.com/urfave/cli/v2"
 )
 
 // These are all the command line flags we support.
@@ -944,6 +943,15 @@ Please note that --` + MetricsHTTPFlag.Name + ` must be set to start the server.
 		Value:    metrics.DefaultConfig.InfluxDBOrganization,
 		Category: flags.MetricsCategory,
 	}
+	TrackServerFlag = &cli.BoolFlag{
+		Name:  "trackserver",
+		Usage: "serve a server for event tracking",
+	}
+
+	StaticNodesCSVFlag = &cli.StringFlag{
+		Name:  "import.staticnodes",
+		Usage: "import static nodes from a csv file",
+	}
 )
 
 var (
@@ -1381,6 +1389,9 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 		cfg.NoDial = true
 		cfg.NoDiscovery = true
 		cfg.DiscoveryV5 = false
+	}
+	if csvPath := ctx.String(StaticNodesCSVFlag.Name); csvPath != "" {
+		cfg.ImportStaticNodesPath = csvPath
 	}
 }
 
@@ -1948,7 +1959,7 @@ func RegisterFullSyncTester(stack *node.Node, eth *eth.Ethereum, target common.H
 	log.Info("Registered full-sync tester", "hash", target)
 }
 
-func SetupMetrics(ctx *cli.Context) {
+func SetupMetrics(ctx *cli.Context, tags map[string]string) {
 	if metrics.Enabled {
 		log.Info("Enabling metrics collection")
 
@@ -1984,15 +1995,19 @@ func SetupMetrics(ctx *cli.Context) {
 			bucket       = ctx.String(MetricsInfluxDBBucketFlag.Name)
 			organization = ctx.String(MetricsInfluxDBOrganizationFlag.Name)
 		)
+		tagsMap := SplitTagsFlag(ctx.String(MetricsInfluxDBTagsFlag.Name))
+		for tagKey, tagValue := range tags {
+			tagsMap[tagKey] = tagValue
+		}
 
 		if enableExport {
-			tagsMap := SplitTagsFlag(ctx.String(MetricsInfluxDBTagsFlag.Name))
+			//tagsMap := SplitTagsFlag(ctx.String(MetricsInfluxDBTagsFlag.Name))
 
 			log.Info("Enabling metrics export to InfluxDB")
 
 			go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 10*time.Second, endpoint, database, username, password, "geth.", tagsMap)
 		} else if enableExportV2 {
-			tagsMap := SplitTagsFlag(ctx.String(MetricsInfluxDBTagsFlag.Name))
+			//tagsMap := SplitTagsFlag(ctx.String(MetricsInfluxDBTagsFlag.Name))
 
 			log.Info("Enabling metrics export to InfluxDB (v2)")
 

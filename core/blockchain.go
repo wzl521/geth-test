@@ -507,10 +507,12 @@ func (bc *BlockChain) loadLastState() error {
 	bc.currentSnapBlock.Store(headBlock.Header())
 	headFastBlockGauge.Update(int64(headBlock.NumberU64()))
 
+	log.Info("headFastBlockGauge update", "num", headBlock.NumberU64())
 	if head := rawdb.ReadHeadFastBlockHash(bc.db); head != (common.Hash{}) {
 		if block := bc.GetBlockByHash(head); block != nil {
 			bc.currentSnapBlock.Store(block.Header())
 			headFastBlockGauge.Update(int64(block.NumberU64()))
+			log.Info("headFastBlockGauge update", "num", block.NumberU64())
 		}
 	}
 
@@ -521,8 +523,10 @@ func (bc *BlockChain) loadLastState() error {
 		if block := bc.GetBlockByHash(head); block != nil {
 			bc.currentFinalBlock.Store(block.Header())
 			headFinalizedBlockGauge.Update(int64(block.NumberU64()))
+			log.Info("headFinalizedBlockGauge update", "num", block.NumberU64())
 			bc.currentSafeBlock.Store(block.Header())
 			headSafeBlockGauge.Update(int64(block.NumberU64()))
+			log.Info("headSafeBlockGauge update", "num", block.NumberU64())
 		}
 	}
 	// Issue a status log for the user
@@ -533,6 +537,7 @@ func (bc *BlockChain) loadLastState() error {
 		headerTd = bc.GetTd(headHeader.Hash(), headHeader.Number.Uint64())
 		blockTd  = bc.GetTd(headBlock.Hash(), headBlock.NumberU64())
 	)
+
 	if headHeader.Hash() != headBlock.Hash() {
 		log.Info("Loaded most recent local header", "number", headHeader.Number, "hash", headHeader.Hash(), "td", headerTd, "age", common.PrettyAge(time.Unix(int64(headHeader.Time), 0)))
 	}
@@ -851,6 +856,7 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, time uint64, root common.Ha
 			// to low, so it's safe the update in-memory markers directly.
 			bc.currentSnapBlock.Store(newHeadSnapBlock.Header())
 			headFastBlockGauge.Update(int64(newHeadSnapBlock.NumberU64()))
+			log.Info("headFastBlockGauge update", "num", newHeadSnapBlock.NumberU64())
 		}
 		var (
 			headHeader = bc.CurrentBlock()
@@ -992,6 +998,7 @@ func (bc *BlockChain) ResetWithGenesisBlock(genesis *types.Block) error {
 	bc.hc.SetCurrentHeader(bc.genesisBlock.Header())
 	bc.currentSnapBlock.Store(bc.genesisBlock.Header())
 	headFastBlockGauge.Update(int64(bc.genesisBlock.NumberU64()))
+	log.Info("headFastBlockGauge update", "num", bc.genesisBlock.NumberU64())
 	return nil
 }
 
@@ -1057,6 +1064,7 @@ func (bc *BlockChain) writeHeadBlock(block *types.Block) {
 	bc.currentSnapBlock.Store(block.Header())
 	headFastBlockGauge.Update(int64(block.NumberU64()))
 
+	log.Info("headFastBlockGauge update", "num", block.NumberU64())
 	bc.currentBlock.Store(block.Header())
 	headBlockGauge.Update(int64(block.NumberU64()))
 }

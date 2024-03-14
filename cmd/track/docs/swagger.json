@@ -1,0 +1,486 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/block/all": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "Get all blocks by paging",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page index, start from 1, default 1",
+                        "name": "page",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page size, default 10",
+                        "name": "pagesize",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BlocksResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/block/{number}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "Get block by block number",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "block number",
+                        "name": "blockNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BlocksResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/node/all": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "node"
+                ],
+                "summary": "Get all nodes by paging",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page index, start from 1, default 1",
+                        "name": "page",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page size, default 10",
+                        "name": "pagesize",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.NodesResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/node/stats": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "node"
+                ],
+                "summary": "Get node stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.NodeStats"
+                        }
+                    }
+                }
+            }
+        },
+        "/node/top10": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "node"
+                ],
+                "summary": "Get top 10 nodes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.CountryNode"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/node/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "node"
+                ],
+                "summary": "Get node",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "node ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.NodesResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transaction/all": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Get all transactions by paging",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page index, start from 1, default 1",
+                        "name": "page",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page size, default 10",
+                        "name": "pagesize",
+                        "in": "path"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/transaction/{hash}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Get transaction by hash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "transaction hash",
+                        "name": "hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "models.Block": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string"
+                },
+                "headers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Header"
+                    }
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "propagators": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Propagator"
+                    }
+                }
+            }
+        },
+        "models.BlocksResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Block"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.CountryNode": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "string"
+                },
+                "stat": {
+                    "$ref": "#/definitions/models.CountryNodeStat"
+                },
+                "value": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.CountryNodeStat": {
+            "type": "object",
+            "properties": {
+                "last24h": {
+                    "type": "string"
+                },
+                "last7d": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Header": {
+            "type": "object",
+            "properties": {
+                "extraData": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "gasLimit": {
+                    "description": "Difficulty  *big.Int   `json:\"difficulty\" bson:\"difficulty\"`\nNumber      *big.Int   `json:\"number\" bson:\"number\"`",
+                    "type": "integer"
+                },
+                "gasUsed": {
+                    "type": "integer"
+                },
+                "logsBloom": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "miner": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "mixHash": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "nonce": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "parentHash": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "receiptsRoot": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "sha3Uncles": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "stateRoot": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "transactionsRoot": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "models.Node": {
+            "type": "object",
+            "properties": {
+                "IP": {
+                    "type": "string"
+                },
+                "TCP": {
+                    "type": "integer"
+                },
+                "UDP": {
+                    "type": "integer"
+                },
+                "caps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique node identifier",
+                    "type": "string"
+                },
+                "inbound": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "outbound": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "remoteAddress": {
+                    "description": "Remote endpoint of the TCP data connection",
+                    "type": "string"
+                }
+            }
+        },
+        "models.NodeStats": {
+            "type": "object",
+            "properties": {
+                "last24h": {
+                    "type": "string"
+                },
+                "last7d": {
+                    "type": "string"
+                },
+                "lastWeek": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.NodesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Node"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Propagator": {
+            "type": "object",
+            "properties": {
+                "fromPeerId": {
+                    "type": "string"
+                },
+                "isHead": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

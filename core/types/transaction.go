@@ -475,6 +475,21 @@ func (tx *Transaction) Hash() common.Hash {
 	return h
 }
 
+func (tx *Transaction) From() common.From {
+	if from := tx.from.Load(); from != nil {
+		return from.(common.From)
+	}
+
+	var h common.From
+	if tx.Type() == LegacyTxType {
+		h = rlpFromHash(tx.inner)
+	} else {
+		h = prefixedRlpFromHash(tx.Type(), tx.inner)
+	}
+	tx.from.Store(h)
+	return h
+}
+
 // Size returns the true encoded storage size of the transaction, either by encoding
 // and returning it, or returning a previously cached value.
 func (tx *Transaction) Size() uint64 {

@@ -19,6 +19,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/track"
 	"os"
 	"sort"
 	"strconv"
@@ -43,8 +44,6 @@ import (
 	// Force-load the tracer engines to trigger registration
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
-
-	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -204,6 +203,9 @@ var (
 		utils.MetricsInfluxDBBucketFlag,
 		utils.MetricsInfluxDBOrganizationFlag,
 	}
+	trackFlags = []cli.Flag{
+		utils.TrackServerFlag,
+	}
 )
 
 var app = flags.NewApp("the go-ethereum command line interface")
@@ -255,6 +257,7 @@ func init() {
 		consoleFlags,
 		debug.Flags,
 		metricsFlags,
+		trackFlags,
 	)
 	flags.AutoEnvVars(app.Flags, "GETH")
 
@@ -328,9 +331,16 @@ func prepare(ctx *cli.Context) {
 			ctx.Set(utils.CacheFlag.Name, strconv.Itoa(4096))
 		}
 	}
+}
 
+// Start metrics export if enabled
+func prepareMetrics(ctx *cli.Context, tags map[string]string) {
 	// Start metrics export if enabled
-	utils.SetupMetrics(ctx)
+	utils.SetupMetrics(ctx, tags)
+
+	if ctx.Bool(utils.TrackServerFlag.Name) {
+		track.ServerInit()
+	}
 
 	// Start system runtime metrics collection
 	go metrics.CollectProcessMetrics(3 * time.Second)
@@ -347,6 +357,10 @@ func geth(ctx *cli.Context) error {
 	prepare(ctx)
 	stack, backend := makeFullNode(ctx)
 	defer stack.Close()
+
+	prepareMetrics(ctx, map[string]string{
+		"host": stack.Server().Self().ID().String()[:8],
+	})
 
 	startNode(ctx, stack, backend, false)
 	stack.Wait()

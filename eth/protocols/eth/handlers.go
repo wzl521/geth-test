@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/track"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
@@ -368,6 +370,16 @@ func handleNewPooledTransactionHashes(backend Backend, msg Decoder, peer *Peer) 
 	// Schedule all the unknown hashes for retrieval
 	for _, hash := range ann.Hashes {
 		peer.markTransaction(hash)
+		track.EmitTrack(track.BlockBroadcast, msg.Time().UnixMilli(), track.BlockBroadcastMessage{
+			Number: block.Number,
+			Hash:   block.Hash.String(),
+			Propagator: track.Propagator{
+				FromPeerId: fmt.Sprintf("%x", crypto.FromECDSAPub(peer.Node().Pubkey())[1:]),
+				FromPeerIP: peer.Node().IP().String(),
+				IsHead:     true,
+				Timestamp:  msg.Time().UnixMilli(),
+			},
+		})
 	}
 	return backend.Handle(peer, ann)
 }
@@ -376,6 +388,7 @@ func handleGetPooledTransactions(backend Backend, msg Decoder, peer *Peer) error
 	// Decode the pooled transactions retrieval message
 	var query GetPooledTransactionsPacket
 	if err := msg.Decode(&query); err != nil {
+		log.Error("handleGetPooledTransactions_Decode new transcation", "err", err)
 		return fmt.Errorf("%w: message %v: %v", errDecode, msg, err)
 	}
 	hashes, txs := answerGetPooledTransactions(backend, query.GetPooledTransactionsRequest)
@@ -425,6 +438,39 @@ func handleTransactions(backend Backend, msg Decoder, peer *Peer) error {
 		if tx == nil {
 			return fmt.Errorf("%w: transaction %d is nil", errDecode, i)
 		}
+		vString, rString, sString := "", "", ""
+		v, r, s := tx.RawSignatureValues()
+		if v != nil {
+			vString = v.String()
+		}
+		if r != nil {
+			rString = r.String()
+		}
+		if s != nil {
+			sString = s.String()
+		}
+
+		from := ""
+		to := ""
+		if toHash := tx.To(); toHash != nil {
+			to = toHash.Hex()
+		}
+		track.EmitTrack(track.TransactionBroadcast, msg.Time().UnixMilli(), track.TransactionBroadcastMessage{
+			Hash: tx.Hash().String(),
+			Data: fmt.Sprintf("0x%x", tx.Data()),
+			Propagator: track.Propagator{
+				FromPeerId: fmt.Sprintf("%x", crypto.FromECDSAPub(peer.Node().Pubkey())[1:]),
+				FromPeerIP: peer.Node().IP().String(),
+				IsHead:     false,
+				Timestamp:  msg.Time().UnixMilli(),
+			},
+			Value: tx.Value().String(),
+			From:  tx.From().String(),
+			To:    to,
+			V:     vString,
+			R:     rString,
+			S:     sString,
+		})
 		peer.markTransaction(tx.Hash())
 	}
 	return backend.Handle(peer, &txs)
@@ -445,6 +491,15 @@ func handlePooledTransactions(backend Backend, msg Decoder, peer *Peer) error {
 		if tx == nil {
 			return fmt.Errorf("%w: transaction %d is nil", errDecode, i)
 		}
+		track.EmitTrack(track.TransactionBroadcast, msg.Time().UnixMilli(), track.TransactionBroadcastMessage{
+			Hash: tx.Hash().String(),
+			Propagator: track.Propagator{
+				FromPeerId: fmt.Sprintf("%x", crypto.FromECDSAPub(peer.Node().Pubkey())[1:]),
+				FromPeerIP: peer.Node().IP().String(),
+				IsHead:     true,
+				Timestamp:  msg.Time().UnixMilli(),
+			},
+		})
 		peer.markTransaction(tx.Hash())
 	}
 	requestTracker.Fulfil(peer.id, peer.version, PooledTransactionsMsg, txs.RequestId)

@@ -1,0 +1,27 @@
+{
+  "base": "http://jobmanager:8081/",
+  "dir": "/opt/flink/",
+  "jar": "mathJob-1.0-SNAPSHOT.jar",
+  "tasks": [
+    {
+      "entryClass": "org.example.tasks.BlockPropagationCount",
+      "args": "-kafka kafka:9092 -kafka.in.topic BlockData"
+    },
+    {
+      "entryClass": "org.example.tasks.OnlineTimeAccumulation",
+      "args": "-kafka kafka:9092 -kafka.in.topic OnlineData"
+    },
+    {
+      "entryClass": "org.example.tasks.TransactionPropagationCount",
+      "args": "-kafka kafka:9092 -kafka.in.topic TransactionData"
+    },
+    {
+      "entryClass": "org.example.tasks.UniqueNodesCountByCountry",
+      "args": "-kafka kafka:9092 -kafka.in.topic OnlineData   "
+    },
+    {
+      "entryClass": "org.example.tasks.UniqueNodesCount",
+      "args": "-kafka kafka:9092 -kafka.in.topic OnlineData"
+    }
+  ]
+}

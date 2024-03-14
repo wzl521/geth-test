@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package="./;communicate";
+package communicate;
+
+service TrackPuber {
+  rpc GetTrack (GetTrackRequest) returns (stream Track) {}
+  rpc GetTrackList (GetTrackRequest) returns (stream TrackList) {}
+  rpc GetInterestedTrack(GetTrackRequest) returns (stream Track) {}
+}
+
+message GetTrackRequest {
+  string topic = 1;
+}
+
+message TrackList {
+  repeated Track list = 1;
+}
+
+message Track {
+  uint32 topic = 1;
+  int64 timestamp = 2;
+  bytes data = 3;
+}

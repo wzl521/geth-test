@@ -39,6 +39,7 @@ const (
 	HashLength = 32
 	// AddressLength is the expected length of the address
 	AddressLength = 20
+	FromLength    = 32
 )
 
 var (
@@ -54,6 +55,8 @@ var (
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
 type Hash [HashLength]byte
+
+type From [FromLength]byte
 
 // BytesToHash sets b to hash.
 // If b is larger than len(h), b will be cropped from the left.
@@ -85,6 +88,8 @@ func (h Hash) Big() *big.Int { return new(big.Int).SetBytes(h[:]) }
 // Hex converts a hash to a hex string.
 func (h Hash) Hex() string { return hexutil.Encode(h[:]) }
 
+func (from From) Hex() string { return hexutil.Encode(from[:]) }
+
 // TerminalString implements log.TerminalStringer, formatting a string for console
 // output during logging.
 func (h Hash) TerminalString() string {
@@ -95,6 +100,9 @@ func (h Hash) TerminalString() string {
 // doing full logging into a file.
 func (h Hash) String() string {
 	return h.Hex()
+}
+func (from From) String() string {
+	return from.Hex()
 }
 
 // Format implements fmt.Formatter.

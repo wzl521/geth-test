@@ -109,6 +109,9 @@ func (c *crawler) run(timeout time.Duration, nthreads int) nodeSet {
 			for {
 				select {
 				case n := <-c.ch:
+					log.Info("get node", "node", n.String(), "from", n.IP().String())
+					c.updateNode(n)
+					log.Info("c.updateNode(n) is ==>", c.updateNode(n))
 					switch c.updateNode(n) {
 					case nodeSkipIncompat:
 						skipped.Add(1)
